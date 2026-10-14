@@ -1,0 +1,50 @@
+services:
+  broker:
+    image: redis:7-alpine
+    container_name: logiflow-redis-broker
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - logiflow-net
+
+  api-producer:
+    build:
+      context: ./api-producer
+      dockerfile: Dockerfile
+    container_name: logiflow-api-producer
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - REDIS_HOST=broker
+      - REDIS_PORT=6379
+    depends_on:
+      broker:
+        condition: service_healthy
+    networks:
+      - logiflow-net
+
+  gps-worker:
+    build:
+      context: ./gps-worker
+      dockerfile: Dockerfile
+    container_name: logiflow-gps-worker
+    environment:
+      - REDIS_HOST=broker
+      - REDIS_PORT=6379
+      - PROCESSING_DELAY_MS=50
+    depends_on:
+      broker:
+        condition: service_healthy
+    networks:
+      - logiflow-net
+
+networks:
+  logiflow-net:
+    driver: bridge

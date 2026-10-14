@@ -1,0 +1,14 @@
+{
+  "name": "gps-worker",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "BullMQ Worker asynchrone pour l'ingestion découplée",
+  "main": "src/worker.js",
+  "scripts": {
+    "start": "node src/worker.js"
+  },
+  "dependencies": {
+    "bullmq": "^5.41.0",
+    "ioredis": "^5.4.1"
+  }
+}
