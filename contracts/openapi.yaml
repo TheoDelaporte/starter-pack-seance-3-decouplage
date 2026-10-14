@@ -1,0 +1,115 @@
+openapi: 3.1.0
+info:
+  title: LogiFlow - Ingestion GPS API
+  version: 1.0.0
+  description: >-
+    Spécification formelle de l'API d'ingestion haute fréquence pour les positions
+    GPS des chauffeurs de la flotte LogiFlow.
+    Cette API applique le pattern de Load Leveling (mise en tampon asynchrone non-bloquante)
+    pour encaisser les pics de charge massifs sans saturer les bases de données.
+  contact:
+    name: Équipe Architecture & Plateforme LogiFlow
+    email: architecture@logiflow.internal
+
+paths:
+  /api/positions:
+    post:
+      summary: Ingestion d'une position GPS chauffeur
+      description: Ingestion haute fréquence non-bloquante des coordonnées des chauffeurs.
+      operationId: ingestGpsPosition
+      requestBody:
+        description: Coordonnées géographiques et métadonnées de télémétrie émises par le terminal embarqué.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GpsPositionInput'
+      responses:
+        '202':
+          description: Coordonnées acceptées et bufférisées dans le sas Redis (Load Leveling).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestionAccepted'
+        '400':
+          description: Payload invalide ou champs manquants/hors bornes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+
+components:
+  schemas:
+    GpsPositionInput:
+      type: object
+      description: Payload de télémétrie GPS transmis par l'application chauffeur.
+      required:
+        - driverId
+        - latitude
+        - longitude
+        - timestamp
+      properties:
+        pingId:
+          type: string
+          description: >-
+            Identifiant unique de corrélation client (optionnel) utilisé pour
+            garantir l'idempotence de bout en bout et dédupliquer les envois réseau répétés.
+          example: "ping_1712839200000_abc123"
+        driverId:
+          type: string
+          description: Identifiant unique du chauffeur émetteur.
+          example: "DRV-12"
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+          description: Latitude décimale au standard WGS84 (entre -90 et 90 degrés).
+          example: 48.8566
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+          description: Longitude décimale au standard WGS84 (entre -180 et 180 degrés).
+          example: 2.3522
+        timestamp:
+          type: integer
+          description: Horodatage Unix de capture de la position (en secondes ou millisecondes).
+          example: 1712839200000
+
+    IngestionAccepted:
+      type: object
+      description: Confirmation d'acceptation et de bufférisation immédiate dans la file de messages.
+      required:
+        - status
+        - pingId
+      properties:
+        status:
+          type: string
+          description: État de l'ingestion dans le sas asynchrone.
+          example: "QUEUED"
+        pingId:
+          type: string
+          description: Identifiant de suivi du message attribué ou repris du client.
+          example: "ping_1712839200000_abc123"
+        message:
+          type: string
+          description: Message informatif de prise en charge.
+          example: "Position acceptée et bufférisée avec succès."
+
+    BadRequestError:
+      type: object
+      description: Structure d'erreur en cas de non-respect du contrat d'interface.
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: "Bad Request"
+        message:
+          type: string
+          example: "body/latitude must be <= 90"

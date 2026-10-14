@@ -1,0 +1,81 @@
+asyncapi: 3.0.0
+info:
+  title: LogiFlow - GPS Event Pipeline
+  version: 1.0.0
+  description: >-
+    Spécification formelle du pipeline asynchrone de traitement et de distribution
+    des événements de géolocalisation des chauffeurs LogiFlow.
+    Définit le contrat d'échange événementiel transitant par le broker de messages (Redis / BullMQ).
+  contact:
+    name: Équipe Architecture & Plateforme LogiFlow
+    email: architecture@logiflow.internal
+
+channels:
+  gpsPingChannel:
+    address: logiflow.gps.v1.ping
+    description: >-
+      Canal de transit des événements de géolocalisation brute ingérés, destiné
+      au dépilage et au traitement régulé par les workers en arrière-plan.
+    messages:
+      gpsPingEvent:
+        $ref: '#/components/messages/GpsPingEvent'
+
+operations:
+  onGpsPingReceived:
+    action: receive
+    channel:
+      $ref: '#/channels/gpsPingChannel'
+    description: Consommation asynchrone par les workers de traitement GPS en arrière-plan.
+    messages:
+      - $ref: '#/channels/gpsPingChannel/messages/gpsPingEvent'
+
+components:
+  messages:
+    GpsPingEvent:
+      name: GpsPingEvent
+      title: Événement de Ping GPS Chauffeur
+      summary: Coordonnées géographiques et métadonnées d'ingestion transmises au worker de traitement.
+      contentType: application/json
+      payload:
+        type: object
+        description: Structure de données du message d'événement de télémétrie GPS.
+        required:
+          - eventId
+          - driverId
+          - latitude
+          - longitude
+          - receivedAt
+        properties:
+          eventId:
+            type: string
+            format: uuid
+            description: >-
+              Identifiant unique de l'événement (UUID v4) utilisé pour assurer la traçabilité distribuée
+              et la déduplication au sein de l'Idempotent Consumer.
+            example: "e6f981a8-8e6f-4d92-bb8d-71b3cfb9b820"
+          driverId:
+            type: string
+            description: Identifiant unique du chauffeur émetteur.
+            example: "DRV-12"
+          latitude:
+            type: number
+            minimum: -90
+            maximum: 90
+            description: Latitude WGS84 décimale comprise entre -90 et 90 degrés.
+            example: 48.8566
+          longitude:
+            type: number
+            minimum: -180
+            maximum: 180
+            description: Longitude WGS84 décimale comprise entre -180 et 180 degrés.
+            example: 2.3522
+          receivedAt:
+            description: Horodatage officiel de réception dans le pipeline (format ISO-8601 date-time ou entier timestamp Unix).
+            oneOf:
+              - type: string
+                format: date-time
+                description: Représentation horodatée normalisée ISO 8601 UTC.
+                example: "2026-10-14T08:57:35.000Z"
+              - type: integer
+                description: Timestamp Unix en millisecondes.
+                example: 1712839200000
