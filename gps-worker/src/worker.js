@@ -21,13 +21,8 @@ const worker = new Worker(
     const { pingId, driverId, latitude, longitude, timestamp } = job.data;
 
     // Mission 2 (Dépilage asynchrone régulé) :
-    // Simuler le traitement lourd d'un ping GPS (50 ms) sans bloquer l'API.
 
-    // Mission 3 (Bonus M1 - Idempotence & Résistance aux doublons) :
-    // Deux pings avec le même pingId peuvent arriver sur le réseau (livraison at-least-once).
-    // Concevoir un mécanisme (ex: avec Redis) pour détecter et ignorer les doublons.
-
-    // TODO Métier : exécuter le traitement à votre charge
+    // Mission 3 (Idempotence) :
     await sleep(processingDelayMs);
     console.log(`[Worker] Job #${job.id} reçu pour pingId: ${pingId}`);
 
@@ -47,7 +42,7 @@ worker.on('completed', (job) => {
 });
 
 worker.on('failed', (job, err) => {
-  console.error(`❌ [Worker] Échec sur le Job #${job?.id}: ${err.message}`);
+  console.error(` [Worker] Échec sur le Job #${job?.id}: ${err.message}`);
 });
 
 process.on('SIGTERM', async () => {

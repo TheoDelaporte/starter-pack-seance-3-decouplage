@@ -35,15 +35,11 @@ fastify.post('/api/positions', { schema: pingSchema }, async (request, reply) =>
   const pingId = ping.pingId || `ping_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
   // Mission 1 (Découplage temporel & Load Leveling) :
-  // 1. Ajouter le job dans la file BullMQ 'gps-pings'.
-  // 2. Renvoyer immédiatement le statut HTTP 202 Accepted (< 10 ms) avec le pingId généré.
-  // Objectif : libérer le client instantanément sans attendre le traitement lourd.
-  
+
   return reply.code(501).send({ message: 'Not Implemented - À vous de concevoir le flux asynchrone' });
 });
 
 // Épreuve 4 (Observabilité & Backlog Monitor) :
-// Exposer l'état en temps réel de la file BullMQ (waiting, active, completed, failed)
 fastify.get('/metrics', async (request, reply) => {
   // Mission 4 : Récupérer les compteurs via gpsQueue.getJobCounts(...)
   return reply.code(501).send({ message: 'Not Implemented - À vous d’exposer les métriques de la queue' });

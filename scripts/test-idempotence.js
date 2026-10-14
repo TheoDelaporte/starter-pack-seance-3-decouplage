@@ -19,8 +19,8 @@ async function run() {
     timestamp: Date.now(),
   };
 
-  console.log(`🧪 [Épreuve 3] Test de résistance aux doublons (Idempotence)`);
-  console.log(`📦 Envoi du 1er ping avec ID : ${duplicatePingId}...`);
+  console.log(` [Épreuve 3] Test de résistance aux doublons (Idempotence)`);
+  console.log(` Envoi du 1er ping avec ID : ${duplicatePingId}...`);
 
   const res1 = await fetch(TARGET_URL, {
     method: 'POST',
@@ -28,24 +28,24 @@ async function run() {
     body: JSON.stringify(payload),
   });
   const data1 = await res1.json();
-  console.log(`➡️ Réponse 1er ping : Status ${res1.status}`, data1);
+  console.log(` Réponse 1er ping : Status ${res1.status}`, data1);
 
-  console.log(`⏳ Attente de 1 seconde...`);
+  console.log(` Attente de 1 seconde...`);
   await sleep(1000);
 
-  console.log(`📦 Envoi du 2nd ping IDENTIQUE (même pingId)...`);
+  console.log(` Envoi du 2nd ping IDENTIQUE (même pingId)...`);
   const res2 = await fetch(TARGET_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
   const data2 = await res2.json();
-  console.log(`➡️ Réponse 2nd ping : Status ${res2.status}`, data2);
+  console.log(` Réponse 2nd ping : Status ${res2.status}`, data2);
 
-  console.log('\n🔍 Regardez les logs du worker :');
+  console.log('\n Regardez les logs du worker :');
   console.log('   docker compose logs -f gps-worker');
-  console.log('   Le 1er job doit afficher "✅ Traité"');
-  console.log('   Le 2nd job doit afficher "⚠️ DOUBLON DÉTECTÉ ... Message ignoré silencieusement"');
+  console.log('   Le 1er job doit afficher " Traité"');
+  console.log('   Le 2nd job doit afficher " DOUBLON DÉTECTÉ ... Message ignoré silencieusement"');
 }
 
 run();

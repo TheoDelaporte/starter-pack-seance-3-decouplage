@@ -33,7 +33,7 @@ async function sendPing(index) {
 }
 
 async function run() {
-  console.log(`🚀 [Épreuve 1] Démarrage de l'injection en rafale de ${TOTAL_PINGS} requêtes vers ${TARGET_URL}...`);
+  console.log(` [Épreuve 1] Démarrage de l'injection en rafale de ${TOTAL_PINGS} requêtes vers ${TARGET_URL}...`);
   const globalStart = performance.now();
 
   const promises = Array.from({ length: TOTAL_PINGS }, (_, i) => sendPing(i + 1));
@@ -47,7 +47,7 @@ async function run() {
   const p95 = durations[Math.floor(durations.length * 0.95)].toFixed(1);
   const p99 = durations[Math.floor(durations.length * 0.99)].toFixed(1);
 
-  console.log('\n📊 --- RÉSULTATS DU CRASH TEST (PIC DE CHARGE) ---');
+  console.log('\n --- RÉSULTATS DU CRASH TEST (PIC DE CHARGE) ---');
   console.log(`Total requêtes envoyées : ${TOTAL_PINGS}`);
   console.log(`Succès (202 Accepted)  : ${successes.length}/${TOTAL_PINGS} (${((successes.length / TOTAL_PINGS) * 100).toFixed(0)}%)`);
   console.log(`Durée totale d'envoi    : ${totalTime.toFixed(1)} ms`);
@@ -56,9 +56,9 @@ async function run() {
   console.log(`Latence p99             : ${p99} ms`);
 
   if (successes.length === TOTAL_PINGS && p95 < 50) {
-    console.log('\n✅ ÉPREUVE 1 VALIDÉE : Découplage temporel et Load Leveling parfaits !');
+    console.log('\n ÉPREUVE 1 VALIDÉE : Découplage temporel et Load Leveling parfaits !');
   } else {
-    console.log('\n⚠️ ATTENTION : Certaines requêtes ont échoué ou dépassé le seuil de latence.');
+    console.log('\n ATTENTION : Certaines requêtes ont échoué ou dépassé le seuil de latence.');
   }
 }
 
