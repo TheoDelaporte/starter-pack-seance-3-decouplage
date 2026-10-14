@@ -1,8 +1,7 @@
 # Starter Pack — TP Découplage Temporel & Load Leveling
 
 > **Module** : M1 — Architecture Logicielle, Design Patterns & Urbanisation SI  
-> **Séance 3** : Boucle 4 — Résilience Distribuée & Load Leveling  
-> **Durée** : 1h00  
+> **Séance 3** : Boucle 4 — Résilience Distribuée & Load Leveling   
 
 ---
 
